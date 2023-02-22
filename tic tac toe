@@ -1,0 +1,73 @@
+// Define constants for the game board
+const PLAYER_X = "X";
+const PLAYER_O = "O";
+const EMPTY_CELL = " ";
+
+// Initialize the game board as an array of empty cells
+let gameBoard = [  EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,  EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,  EMPTY_CELL, EMPTY_CELL, EMPTY_CELL];
+
+// Define the main function to make a move for the computer player
+function computerMove() {
+  // Call the Minimax algorithm to find the best move for the computer
+  let bestMove = minimax(gameBoard, PLAYER_O).index;
+  // Set the chosen cell to the computer's symbol
+  gameBoard[bestMove] = PLAYER_O;
+}
+
+// Define the Minimax algorithm to evaluate all possible moves and choose the best one
+function minimax(board, player) {
+  // Define the utility function to evaluate the game state and return a score
+  let score = evaluate(board);
+  
+  // Base case: if the game is over, return the score
+  if (score !== 0) {
+    return {score: score};
+  }
+  
+  // Recursive case: evaluate all possible moves and choose the best one
+  let bestMove = null;
+  let bestScore = null;
+  
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] === EMPTY_CELL) {
+      board[i] = player;
+      let currentScore = minimax(board, (player === PLAYER_O) ? PLAYER_X : PLAYER_O).score;
+      board[i] = EMPTY_CELL;
+      
+      if ((player === PLAYER_O && currentScore > bestScore) || (player === PLAYER_X && currentScore < bestScore) || bestScore === null) {
+        bestScore = currentScore;
+        bestMove = i;
+      }
+    }
+  }
+  
+  return {score: bestScore, index: bestMove};
+}
+
+// Define the utility function to evaluate the game state and return a score
+function evaluate(board) {
+  // Define all possible winning combinations
+  const WINNING_COMBOS = [    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+  
+  // Check all possible winning combinations
+  for (let i = 0; i < WINNING_COMBOS.length; i++) {
+    let [a, b, c] = WINNING_COMBOS[i];
+    
+    if (board[a] !== EMPTY_CELL && board[a] === board[b] && board[b] === board[c]) {
+      // If the computer wins, return a positive score
+      if (board[a] === PLAYER_O) {
+        return 10;
+      }
+      // If the human wins, return a negative score
+      else if (board[a] === PLAYER_X) {
+        return -10;
+      }
+    }
+  }
+  
+  // If the game is not over, return a score of 0
+  return 0;
+}
